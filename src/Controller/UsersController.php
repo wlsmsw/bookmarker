@@ -12,11 +12,14 @@ use App\Controller\AppController;
  */
 class UsersController extends AppController
 {
-
     public function initialize()
     {
         parent::initialize();
+        
+        // place 'actions' here that is always allowed in public
         $this->Auth->allow(['logout', 'add']);
+        $logged_user = $this->Auth->user();
+        $this->set(compact('logged_user'));
     }
 
     /**
@@ -132,6 +135,12 @@ class UsersController extends AppController
     {
         $this->Flash->success('You are now logged out.');
         return $this->redirect($this->Auth->logout());
+    }
+
+
+    public function isAuthorized($user)
+    {
+        return true;
     }
 
 

@@ -2,6 +2,7 @@
 namespace App\Controller;
 
 use App\Controller\AppController;
+use Cake\Collection\Collection;
 
 /**
  * Bookmarks Controller
@@ -11,12 +12,13 @@ use App\Controller\AppController;
  * @method \App\Model\Entity\Bookmark[] paginate($object = null, array $settings = [])
  */
 class BookmarksController extends AppController
-{
-
+{  
     public function initialize()
     {
+        //debug($this->request->getParam('pass.0'));
         parent::initialize();
-        $this->Auth->allow(['tags','add']); // allowable action 'registrators'
+        $logged_user = $this->Auth->user();
+        $this->set(compact('logged_user'));
     }
     
     
@@ -27,9 +29,17 @@ class BookmarksController extends AppController
      */
     public function index()
     {
+        // $this->paginate = [
+        //     'contain' => ['Users']
+        // ];
+
+        // Set limitation on what records we will show
         $this->paginate = [
-            'contain' => ['Users']
+            'conditions' => [
+                'Bookmarks.user_id' => $this->Auth->user('id'),
+            ]
         ];
+
         $bookmarks = $this->paginate($this->Bookmarks);
 
         $this->set(compact('bookmarks'));
@@ -60,19 +70,22 @@ class BookmarksController extends AppController
      */
     public function add()
     {
+        // prime example of adding new record
+        
         $bookmark = $this->Bookmarks->newEntity();
         if ($this->request->is('post')) {
             $bookmark = $this->Bookmarks->patchEntity($bookmark, $this->request->getData());
+            $bookmark->user_id = $this->Auth->user('id'); // use logged userid as owner of bookmark
             if ($this->Bookmarks->save($bookmark)) {
                 $this->Flash->success(__('The bookmark has been saved.'));
-
                 return $this->redirect(['action' => 'index']);
             }
             $this->Flash->error(__('The bookmark could not be saved. Please, try again.'));
         }
-        $users = $this->Bookmarks->Users->find('list', ['limit' => 200]);
+        //$users = $this->Bookmarks->Users->find('list', ['limit' => 200]);
         $tags = $this->Bookmarks->Tags->find('list', ['limit' => 200]);
-        $this->set(compact('bookmark', 'users', 'tags'));
+        //$this->set(compact('bookmark', 'users', 'tags'));
+        $this->set(compact('bookmark', 'tags'));
         $this->set('_serialize', ['bookmark']);
     }
 
@@ -90,9 +103,9 @@ class BookmarksController extends AppController
         ]);
         if ($this->request->is(['patch', 'post', 'put'])) {
             $bookmark = $this->Bookmarks->patchEntity($bookmark, $this->request->getData());
+            $bookmark->user_id = $this->Auth->user('id');// use logged userid as owner of bookmark
             if ($this->Bookmarks->save($bookmark)) {
                 $this->Flash->success(__('The bookmark has been saved.'));
-
                 return $this->redirect(['action' => 'index']);
             }
             $this->Flash->error(__('The bookmark could not be saved. Please, try again.'));
@@ -146,11 +159,32 @@ class BookmarksController extends AppController
     // this called after logged-in
     public function isAuthorized($user)
     {
-        return true;
+        $action = $this->request->getParam('action');
+
+        // set here the actions that are always allowed when logged-in
+        if (in_array($action, ['index', 'add', 'tags'])) {
+            return true;
+        }
+        
+        // pass.0 is the index of the parameter
+        if (!$this->request->getParam('pass.0')) {
+            return false;
+        }
+        
+        // Check that the bookmark belong to the current user
+        $id = $this->request->getParam('pass.0');
+        $bookmark = $this->Bookmarks->get($id);
+
+        if ($bookmark->user_id == $user['id']) {
+            return true;
+        }
 
         // this will allow default settings by AppController
-        //return parent::isAuthorized($user);
+        // redirect to index landing page
+        return parent::isAuthorized($user);
     }
+
+
 
 
 }

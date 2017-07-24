@@ -11,6 +11,8 @@
         <li><?= $this->Html->link(__('New User'), ['controller' => 'Users', 'action' => 'add']) ?></li>
         <li><?= $this->Html->link(__('List Tags'), ['controller' => 'Tags', 'action' => 'index']) ?></li>
         <li><?= $this->Html->link(__('New Tag'), ['controller' => 'Tags', 'action' => 'add']) ?></li>
+        <hr>
+        <li><?= $this->Html->link(__('Logout'), ['controller' => 'Users', 'action' => 'logout']) ?></li>
     </ul>
 </nav>
 <div class="bookmarks form large-9 medium-8 columns content">
@@ -18,11 +20,12 @@
     <fieldset>
         <legend><?= __('Add Bookmark') ?></legend>
         <?php
-            echo $this->Form->control('user_id', ['options' => $users]);
+            //echo $this->Form->control('user_id', ['options' => $users]);
             echo $this->Form->control('title');
             echo $this->Form->control('description');
             echo $this->Form->control('url');
-            echo $this->Form->control('tags._ids', ['options' => $tags]);
+            //echo $this->Form->control('tags._ids', ['options' => $tags]);
+            echo $this->Form->control('tag_string', ['type' => 'text']);
         ?>
     </fieldset>
     <?= $this->Form->button(__('Submit')) ?>

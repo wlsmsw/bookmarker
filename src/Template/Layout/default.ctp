@@ -41,6 +41,15 @@ $cakeDescription = 'CakePHP: the rapid development php framework';
             </li>
         </ul>
         <div class="top-bar-section">
+            <ul class="left">
+                <?php if (isset($logged_user)) : ?>
+                <li><a>Welcome 
+                        <?php
+                            echo '[' . $logged_user['id'] . '] ' . $logged_user['email'];
+                        ?>
+                    </a></li>
+                <?php endif; ?>
+            </ul>
             <ul class="right">
                 <li><a target="_blank" href="http://book.cakephp.org/3.0/">Documentation</a></li>
                 <li><a target="_blank" href="http://api.cakephp.org/3.0/">API</a></li>

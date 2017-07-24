@@ -72,6 +72,10 @@ class AppController extends Controller
         // Allow the display action so our pages controller
         // continues to work.
         $this->Auth->allow(['display']);
+
+        // get logged users
+        $user = $this->Auth->user();
+        $this->set('user', $user);
     }
 
     // the 'Authorization adapter'
